@@ -1,0 +1,41 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+df = pd.read_csv('marketing_campaign.csv', sep='\t')
+df = df.dropna(subset=['Income'])
+df['Dt_Customer'] = pd.to_datetime(df['Dt_Customer'], dayfirst=True)
+df['Age'] = 2015 - df['Year_Birth']
+df = df[df['Age'] < 100]
+df = df[df['Income'] < 600000]
+df['Marital_Status'] = df['Marital_Status'].replace({
+    'Married': 'Partner', 'Together': 'Partner',
+    'Absurd': 'Alone', 'Widow': 'Alone', 'YOLO': 'Alone', 'Divorced': 'Alone', 'Single': 'Alone'
+})
+df['Has_Children'] = (df['Kidhome'] + df['Teenhome'] > 0).map({True: 'With Children', False: 'No Children'})
+spending_columns = ['MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts', 'MntGoldProds']
+df['Total_Spending'] = df[spending_columns].sum(axis=1)
+sns.set_theme(style="whitegrid")
+#teza1:
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+sns.barplot(data=df, x='Has_Children', y='MntSweetProducts', hue='Has_Children', palette='magma', legend=False)
+plt.title('Average Spending on Sweets')
+plt.subplot(1, 2, 2)
+sns.barplot(data=df, x='Has_Children', y='MntFruits', hue='Has_Children', palette='viridis', legend=False)
+plt.title('Average Spending on Fruits')
+plt.tight_layout()
+plt.savefig('analysis_children.png')
+plt.close()
+#teza2:
+plt.figure(figsize=(12, 5))
+plt.subplot(1, 2, 1)
+sns.scatterplot(data=df, x='Income', y='MntWines', alpha=0.5, color='darkred')
+plt.title('Income vs Wine Spending')
+plt.xlim(0, 150000)
+plt.subplot(1, 2, 2)
+sns.scatterplot(data=df, x='Income', y='MntMeatProducts', alpha=0.5, color='brown')
+plt.title('Income vs Meat Spending')
+plt.xlim(0, 150000)
+plt.tight_layout()
+plt.savefig('analysis_wealth.png')
+plt.close()
